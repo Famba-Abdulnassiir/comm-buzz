@@ -1,7 +1,21 @@
 import { Paper, Image, NativeSelect, Text, Box } from '@mantine/core';
 import { Calendar } from '@mantine/dates';
+import { useEffect, useState } from 'react';
 
 function Events() {
+    const eventsUrl = 'http://localhost:1337/api/events';
+    const [occurrences, setOccurrences] = useState([]);
+
+    useEffect(() => {
+        fetch(eventsUrl)
+            .then(response => response.json())
+            .then(data => {
+                const fetchedEvents = data?.data || [];
+                setOccurrences(fetchedEvents);
+            })
+    }, [])
+
+
     return (
         <>
             <p className="p-4 text-xl font-bold">Calender</p>
@@ -44,86 +58,57 @@ function Events() {
                             withAsterisk
                         />
                     </div>
-                    <div className="border-t-4 bg-white pr-4 rounded-lg border-t-gray-500 flex flex-row gap-5">
-                        <div className="w-48 m-3">
-                            <img src="./src/assets/online event.png" alt="" />
-                        </div>
-                        <div className="pt-4 flex justify-between flex-col">
 
-                            <div>
-                                <p className="text-amber-600">Date and time of the Event</p>
-                                <p className="font-bold">Bold title of the Eventbbbbbbbbbbbbbbtheo one and the bbbbb</p>
-                                <p className="text-gray-500">Location of the Event</p>
-                            </div>
+                    <div>
+                        {
+                            occurrences.map(occurrence => {
+                                const { id, attributes } = occurrence || {};
 
-                            <p className="pt-3 pb-3 text-gray-500">6 Attendiees</p>
+                                if (id && attributes) {
+                                    const { event_title, event_date, event_location, event_attendees, event_image, event_details, } = attributes || {}
 
-                        </div>
-                        <div className="pt-4 flex justify-between flex-col">
-                            <p className="font-bold">Suggested</p>
-                            <div className="pb-3 text-gray-400">
-                                <i className="fa-solid fa-share-nodes"></i>
-                            </div>
+                                    const image_url = event_image?.data?.attributes?.formats?.small?.url || '';
 
-                        </div>
+                                    console.log("Iam the Image" + "" + event_image?.data?.attributes?.formats?.large?.url)
 
-                    </div>
+                                    return (
+                                        <div key={id} className="mb-3">
+                                            <div className="border-t-4 bg-white pr-4 rounded-lg border-t-gray-500 flex flex-row gap-5">
+                                                <div className="w-48 m-3">
+                                                    <img src={image_url} />
+                                                </div>
+                                                <div className="pt-4 flex justify-between flex-col">
 
+                                                    <div>
+                                                        <p className="text-amber-600">{new Date(event_date).toString()}</p>
+                                                        <p className="font-bold text-blue-950">{event_title}</p>
+                                                        <p className="text-gray-500">{event_location}</p>
+                                                    </div>
 
-                    <div className="border-t-4 bg-white pr-4 rounded-lg border-t-gray-500 flex flex-row gap-5">
-                        <div className="w-48 m-3">
-                            <img src="./src/assets/online event.png" alt="" />
-                        </div>
-                        <div className="pt-4 flex justify-between flex-col">
+                                                    <p className="pt-3 pb-3 text-gray-500">{event_attendees}</p>
 
-                            <div>
-                                <p className="text-amber-600">Date and time of the Event</p>
-                                <p className="font-bold">Bold title of the Eventbbbbbbbbbbbbbbtheo one and the bbbbb</p>
-                                <p className="text-gray-500">Location of the Event</p>
-                            </div>
+                                                </div>
+                                                <div className="pt-4 flex justify-between flex-col">
+                                                    <p className="font-bold text-blue-950">Suggested</p>
+                                                    <div className="pb-3 text-gray-400">
+                                                        <i className="fa-solid fa-share-nodes"></i>
+                                                    </div>
 
-                            <p className="pt-3 pb-3 text-gray-500">6 Attendiees</p>
+                                                </div>
 
-                        </div>
-                        <div className="pt-4 flex justify-between flex-col">
-                            <p className="font-bold">Suggested</p>
-                            <div className="pb-3 text-gray-400">
-                                <i className="fa-solid fa-share-nodes"></i>
-                            </div>
+                                            </div>
 
-                        </div>
+                                        </div>
+                                    );
 
-                    </div>
-
-
-                    <div className="border-t-4 bg-white pr-4 rounded-lg border-t-gray-500 flex flex-row gap-5">
-                        <div className="w-48 m-3">
-                            <img src="./src/assets/online event.png" alt="" />
-                        </div>
-                        <div className="pt-4 flex justify-between flex-col">
-
-                            <div>
-                                <p className="text-amber-600">Date and time of the Event</p>
-                                <p className="font-bold">Bold title of the Eventbbbbbbbbbbbbbbtheo one and the bbbbb</p>
-                                <p className="text-gray-500">Location of the Event</p>
-                            </div>
-
-                            <p className="pt-3 pb-3 text-gray-500">6 Attendiees</p>
-
-                        </div>
-                        <div className="pt-4 flex justify-between flex-col">
-                            <p className="font-bold">Suggested</p>
-                            <div className="pb-3 text-gray-400">
-                                <i className="fa-solid fa-share-nodes"></i>
-                            </div>
-
-                        </div>
+                                }
+                                return null
+                            })
+                        }
 
                     </div>
 
                 </div>
-
-
 
             </div>
         </>
