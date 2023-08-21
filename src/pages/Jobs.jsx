@@ -86,8 +86,8 @@ function Jobs() {
 
             <div >
                 {
-                    jobs.map(jobs => {
-                        const { id, attributes } = jobs || {};
+                    jobs.map(job => {
+                        const { id, attributes } = job || {};
 
                         if (id && attributes) {
                             const { job_title, job_location, job_nature, createdAt, job_salary, job_mini_desc, job_link } = attributes || {}

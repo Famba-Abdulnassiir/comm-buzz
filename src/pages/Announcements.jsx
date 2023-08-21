@@ -40,8 +40,8 @@ function Announcements() {
     }, [])
 
     //Search for Announcements
-    const filteredSearch = announcements.filter(announcements => {
-        const { attributes } = announcements || {};
+    const filteredSearch = announcements.filter(announcement => {
+        const { attributes } = announcement || {};
 
         if (attributes) {
             const { announcement_title, announcement_content } = attributes || {};

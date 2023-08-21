@@ -14,9 +14,9 @@ function Dashboard() {
                         </div>
                         <ul className="ml-8 text-lg">
                             <Link to={'/dashboard'}><li><i className="fa-solid fa-house mr-3 pb-4"></i>Home</li></Link>
-                            <Link to={'/dashboard'}><li><i className="fa-solid fa-envelope mr-3 pb-4"></i>Messages</li></Link>
+                            {/* <Link to={'/dashboard'}><li><i className="fa-solid fa-envelope mr-3 pb-4"></i>Messages</li></Link> */}
                             <Link to={'/dashboard/people'}><li><i className="fa-solid fa-people-arrows mr-3 pb-4"></i>People</li></Link>
-                            <Link to={'/dashboard'}><li><i className="fa-solid fa-user mr-3 pb-4"></i>Profile</li></Link>
+                            {/* <Link to={'/dashboard'}><li><i className="fa-solid fa-user mr-3 pb-4"></i>Profile</li></Link> */}
                             {/* <Link to={}><li><i className="fa-solid fa-user-group mr-3 pb-4"></i>Groups</li></Link> */}
                             <Link to={'/dashboard/jobs'}><li><i className="fa-solid fa-briefcase mr-3 pb-4"></i>Jobs</li></Link>
                             <Link to={'/dashboard/events'}><li><i className="fa-regular fa-calendar-days mr-3 pb-4"></i>Events</li></Link>

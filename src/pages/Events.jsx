@@ -3,7 +3,7 @@ import { Calendar } from '@mantine/dates';
 import { useEffect, useState } from 'react';
 
 function Events() {
-    const eventsUrl = 'http://localhost:1337/api/events';
+    const eventsUrl = 'http://localhost:1337/api/events?populate=event_image';
     const [occurrences, setOccurrences] = useState([]);
 
     useEffect(() => {
@@ -11,6 +11,7 @@ function Events() {
             .then(response => response.json())
             .then(data => {
                 const fetchedEvents = data?.data || [];
+                console.log(data)
                 setOccurrences(fetchedEvents);
             })
     }, [])
@@ -65,17 +66,22 @@ function Events() {
                                 const { id, attributes } = occurrence || {};
 
                                 if (id && attributes) {
-                                    const { event_title, event_date, event_location, event_attendees, event_image, event_details, } = attributes || {}
+                                    const { event_title, event_date, event_location, event_attendees, event_image, event_details, } = attributes || {};
 
                                     const image_url = event_image?.data?.attributes?.formats?.small?.url || '';
 
                                     console.log("Iam the Image" + "" + event_image?.data?.attributes?.formats?.large?.url)
 
                                     return (
+
                                         <div key={id} className="mb-3">
                                             <div className="border-t-4 bg-white pr-4 rounded-lg border-t-gray-500 flex flex-row gap-5">
                                                 <div className="w-48 m-3">
-                                                    <img src={image_url} />
+                                                    {image_url ? <Image
+                                                        src={image_url}
+                                                        height={188}
+                                                        alt="Profile Image"
+                                                    /> : null}
                                                 </div>
                                                 <div className="pt-4 flex justify-between flex-col">
 

@@ -13,6 +13,9 @@ body{
     width: 31%;
     /* height: 100%; */
 }
+.person-card{
+    width: 24%;
+}
 
 .ads-card{
     height: 100%;
