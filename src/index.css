@@ -36,4 +36,8 @@ body{
     border-radius: 8px;
     background-clip: padding-box;  
   }
+
+  .home{
+    width: 95%;
+  }
   

@@ -10,11 +10,11 @@ function Header() {
                     </div>
 
 
-                <div className="flex-row flex gap-3 align-middle p-2">
+                {/* <div className="flex-row flex gap-3 align-middle p-2">
                     <p className='text-gray-700'><span><i className="fa-solid fa-bell mr-2"></i></span>Notifications</p>
                     <p className='text-gray-700'><span><i className="fa-solid fa-envelope mr-2"></i></span>Messages</p>
                     <Avatar color="crayn" radius="xl">CB</Avatar>
-                </div>
+                </div> */}
 
             </header>
 

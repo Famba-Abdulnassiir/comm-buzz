@@ -1,19 +1,24 @@
 import { Card, Image, Text, Button, Paper, Title, FileInput, rem, Modal, Group, TextInput } from '@mantine/core';
-import { useState, useEffect } from 'react';
+import { useState, useEffect} from 'react';
 import { IconUpload } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
+import useAdsContext from '../context/AppContext';
+
 
 
 function Adverts() {
-    const [adverts, setAdverts] = useState([])
+    const {adverts, setAdverts} = useAdsContext();
     const advertsUrl = 'http://localhost:1337/api/adverts?populate=advert_image';
     const advertPostUrl = "http://localhost:1337/api/adverts"
     const uploadUrl = "http://localhost:1337/api/upload/";
     const [selectedFile, setSelectedFile] = useState(null);
     const [opened, { open, close }] = useDisclosure(false);
-    const [error, setError] = useState('')
-
+    const [success, setSuccess] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    
+    // const context = useContext(AdsContext)
+    // context.updateAdverts("try")
     //from Mantine useForm we can initialise our values take this as setState in normal react
     const form = useForm({
         initialValues: {
@@ -22,6 +27,7 @@ function Adverts() {
             post_description: ''
         },
     });
+ 
 
     useEffect(() => {
         fetch(advertsUrl)
@@ -37,6 +43,7 @@ function Adverts() {
     //When someone adds a file to our file in put lets post it to the strapi side get a response we can use it as our file to be posted
 
     const handleImageUpload = (values) => {
+        setIsLoading(true)
 
         if (selectedFile) {
             const formData = new FormData();
@@ -73,7 +80,7 @@ function Adverts() {
                     }).then(response => {
                         response.json()
                         if (response.ok) {
-                            setError('Advert Successfull Uploaded')
+                            setSuccess('Advert Successfull Uploaded')
                         } else {
                             throw new Error('Please Ensure all the Fields are entered Correctly');
                         }
@@ -123,7 +130,7 @@ function Adverts() {
                                             <Image
                                                 src={imageUrl}
                                                 height={160}
-                                                alt="No way!"
+                                                alt="Advert image!"
                                             />
                                         </Card.Section>
 
@@ -165,23 +172,31 @@ function Adverts() {
                             placeholder="Enter Advert Short Description "
                             {...form.getInputProps("post_description")}
                         />
-                        <input type='file'
+
+                        <div  className="border-2 border-dashed p-3 w-10/12 m-auto text-center">
+                         <input id="imageUpload" className="m-auto"
+                            type='file'
                             label="Advert Image"
                             placeholder="Upload Your Image"
                             accept="image/png,image/jpeg,image/jpg"
                             onChange={(e) => setSelectedFile(e.target.files[0])}
                             icon={<IconUpload size={rem(14)} />}
                         />
+                        </div>
+
+                        
 
                     </Group>
                     <br />
                     <Button className="bg-blue-700 m-auto" type="submit">Post</Button>
                 </form>
                 <Text className="text-green">
-                    {error}
+                {success || Error} 
+                </Text>
+                <Text>
+                   
                 </Text>
             </Modal>
-
         </>
 
     );

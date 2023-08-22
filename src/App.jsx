@@ -1,11 +1,13 @@
 import Dashboard from "./Layout/Dashboard"
+import { AdsProvider } from "./context/AppContext"
 
 function App() {
   return (
    
-    
-    <Dashboard/>
-    
+    <AdsProvider>
+      <Dashboard/>
+    </AdsProvider>
+   
   )
 }
 

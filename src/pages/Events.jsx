@@ -1,10 +1,14 @@
-import { Paper, Image, NativeSelect, Text, Box } from '@mantine/core';
+import { Paper, Image, NativeSelect, Text, Box, Modal } from '@mantine/core';
 import { Calendar } from '@mantine/dates';
+import { useDisclosure } from '@mantine/hooks';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+
 
 function Events() {
     const eventsUrl = 'http://localhost:1337/api/events?populate=event_image';
     const [occurrences, setOccurrences] = useState([]);
+    const [opened, { open, close }] = useDisclosure(false);
 
     useEffect(() => {
         fetch(eventsUrl)
@@ -73,38 +77,46 @@ function Events() {
                                     console.log("Iam the Image" + "" + event_image?.data?.attributes?.formats?.large?.url)
 
                                     return (
+                                        <>
+                                                <div key={id}   className="mb-3">
+                                                    <div  className="border-t-4 bg-white pr-4 rounded-lg border-t-gray-500 flex flex-row gap-5">
+                                                        <div className="w-48 m-3">
+                                                            {image_url ? <Image
+                                                                src={image_url}
+                                                                height={188}
+                                                                alt="Profile Image"
+                                                            /> : null}
+                                                        </div>
+                                                        <div className="pt-4 flex justify-between flex-col">
 
-                                        <div key={id} className="mb-3">
-                                            <div className="border-t-4 bg-white pr-4 rounded-lg border-t-gray-500 flex flex-row gap-5">
-                                                <div className="w-48 m-3">
-                                                    {image_url ? <Image
-                                                        src={image_url}
-                                                        height={188}
-                                                        alt="Profile Image"
-                                                    /> : null}
-                                                </div>
-                                                <div className="pt-4 flex justify-between flex-col">
+                                                            <div>
+                                                                <p className="text-amber-600">{new Date(event_date).toString()}</p>
+                                                                <p className="font-bold text-blue-950">{event_title}</p>
+                                                                <p className="text-gray-500">{event_location}</p>
+                                                            </div>
 
-                                                    <div>
-                                                        <p className="text-amber-600">{new Date(event_date).toString()}</p>
-                                                        <p className="font-bold text-blue-950">{event_title}</p>
-                                                        <p className="text-gray-500">{event_location}</p>
+                                                            <p className="pt-3 pb-3 text-gray-500">{event_attendees}</p>
+
+                                                        </div>
+                                                        <div className="pt-4 flex justify-between flex-col">
+                                                            <p className="font-bold text-blue-950">Suggested</p>
+                                                            <div className="pb-3 text-gray-400">
+                                                                <i className="fa-solid fa-share-nodes"></i>
+                                                            </div>
+
+                                                        </div>
+
                                                     </div>
 
-                                                    <p className="pt-3 pb-3 text-gray-500">{event_attendees}</p>
-
                                                 </div>
-                                                <div className="pt-4 flex justify-between flex-col">
-                                                    <p className="font-bold text-blue-950">Suggested</p>
-                                                    <div className="pb-3 text-gray-400">
-                                                        <i className="fa-solid fa-share-nodes"></i>
-                                                    </div>
+                                            
 
-                                                </div>
-
-                                            </div>
-
-                                        </div>
+                                            <Modal opened={opened} onClose={close} title="Post Feed" centered>
+                                                <p>
+                                                    {event_details}
+                                                </p>
+                                            </Modal>
+                                        </>
                                     );
 
                                 }
@@ -117,6 +129,7 @@ function Events() {
                 </div>
 
             </div>
+
         </>
     )
 }

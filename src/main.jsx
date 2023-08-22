@@ -10,6 +10,7 @@ import Announcements from "./pages/Announcements";
 import Home from "./pages/Home";
 import Dashboard from './Layout/Dashboard.jsx'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { AdsProvider } from './context/AppContext.jsx'
 
 
 const router = createBrowserRouter([
@@ -54,6 +55,9 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <RouterProvider router={router}></RouterProvider>
+    <AdsProvider>
+      <RouterProvider router={router}></RouterProvider>
+    </AdsProvider>
+    
   </React.StrictMode>,
 )
