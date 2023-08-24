@@ -1,22 +1,25 @@
 import { useDisclosure } from '@mantine/hooks';
-import { Modal, Group, Button, Input, Textarea, Paper, Text, Avatar, Image,rem } from '@mantine/core';
+import { Modal, Group, Button, Input, Textarea, Paper, Text, Avatar, Image, rem, Loader, Notification } from '@mantine/core';
 import { useState, useEffect, useContext } from 'react';
 import { IconUpload } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import useAdsContext from '../context/AppContext';
-import { Loader } from '@mantine/core';
 import { Link } from 'react-router-dom';
+import { IconCheck, IconX } from '@tabler/icons-react';
 
 
 function Home() {
     const [opened, { open, close }] = useDisclosure(false);
-    const postUrl = "http://localhost:1337/api/posts?populate=users_permissions_user,post_images";
-    const [posts, setUsers] = useState([]);
+    const postUrl = "https://strapi-kufv.onrender.com/api/posts?populate=users_permissions_user,post_images";
+    const [posts, setPosts] = useState([]);
     const [selectedFile, setSelectedFile] = useState('');
-    const uploadUrl = "http://localhost:1337/api/posts"
-    const imageUploadUrl = "http://localhost:1337/api/upload/"
+    const uploadUrl = "https://strapi-kufv.onrender.com/api/posts"
+    const imageUploadUrl = "https://strapi-kufv.onrender.com/api/upload/"
     const [error, setError] = useState('')
-    const [isLoading, setIsLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+    const [successMessage, setSuccessMessage] = useState('');
+    // const [formLoading, setFormLoading] = useState(true)
+
 
     const { adverts } = useAdsContext();
     console.log(adverts);
@@ -46,14 +49,16 @@ function Home() {
     // }
 
     useEffect(() => {
-        // setIsLoading(true);
         fetch(postUrl)
             .then(response => response.json())
             .then(data => {
                 const fetchedPosts = data?.data || [];
                 console.log(data)
-                setUsers(fetchedPosts)
-            });
+                setPosts(fetchedPosts)
+            }).catch(error => {
+                console.error("Error fetching data:", error);
+                setError('OPPs. An error occurred while fetching data.... Check you internet Connectivity');
+            }).finally(() => setIsLoading(false));
     }, [])
 
     //Handle Image upload first before we can handle entire post for adverts
@@ -66,6 +71,9 @@ function Home() {
             const formData = new FormData();
             formData.append("files", selectedFile);
 
+            setIsLoading(true);
+
+
             fetch(imageUploadUrl, {
                 method: "POST",
                 body: formData
@@ -74,7 +82,8 @@ function Home() {
                 .then(data => {
                     //Here we save the Image Id to our Application that we shall later use to post data to out Advert page.
                     const fileId = data[0].id;
-                    console.log(fileId)
+                    
+                    
 
                     const { post_content } = form.values
 
@@ -95,12 +104,24 @@ function Home() {
                     }).then(response => {
                         response.json()
                         if (response.ok) {
-                            return (posts)
-                            setError('Post Successfull Uploaded')
+                            setSuccessMessage('Post Successfully Uploaded')
+                            form.reset();
+
+                            setTimeout(() => {
+                                close();
+                                setSuccessMessage("");                                
+                            }, 2300);
+
+                            window.location.reload(false);
+
                         } else {
                             throw new Error('Please Ensure all the Fields are entered Correctly');
                         }
-                    })
+                    }).finally(() => setIsLoading(false));
+
+                }).catch(error => {
+                    setError('OPPs. An error occurred while fetching data.... Check you internet Connectivity')
+                    setIsLoading(false);
 
                 })
         }
@@ -118,7 +139,7 @@ function Home() {
                     <Input placeholder="Whats new in Your Area" onClick={open} />
 
                     <div>
-                        {
+                        {error ? (<Text className="text-center err" size="xl">{error}</Text>) : isLoading ? (<div className="loader"><Loader size="xl" className="w-1/5" /> <Text size="lg">Loading....</Text></div>) : (
                             posts.map(post => {
                                 const { id, attributes } = post;
                                 const { post_content, createdAt, users_permissions_user, post_images, user_location } = attributes;
@@ -165,10 +186,7 @@ function Home() {
 
                                 }
                             })
-
-
-
-                        }
+                        )}
 
 
                     </div>
@@ -184,18 +202,18 @@ function Home() {
                                 const { advert_description, advert_image
                                     , advert_link, advert_title } = attributes || {};
                                 const imageUrl = advert_image?.data?.attributes?.formats?.small?.url || '';
-                            
-                                return(
+
+                                return (
                                     <Paper className="m-3">
-                                        
-                                            <p className="text-gray-800 pt-3 m-2 text-center border-b-2 border-gray-500">Advertising</p>
-                                            <Image src={imageUrl} alt="Advert Image" />
+
+                                        <p className="text-gray-800 pt-3 m-2 text-center border-b-2 border-gray-500">Advertising</p>
+                                        <Image src={imageUrl} alt="Advert Image" />
                                         <div className="p-2">
                                             <p className="text-base font-semibold pt-2 text-gray-800">{advert_title}</p>
-                                            <p className="text-blue-500"><Link to={{advert_link}}>Follow link for Updates</Link></p>
+                                            <p className="text-blue-500"><Link to={{ advert_link }}>Follow link for Updates</Link></p>
                                             <p className="text-gray-500">{advert_description}</p>
                                         </div>
-                                    </Paper>                                
+                                    </Paper>
                                 )
                             }
                             return false;
@@ -258,10 +276,15 @@ function Home() {
                         </div>
                     </Group>
                     <Button type="submit" className="bg-blue-500 mt-3">Post</Button>
+                    <br />
+
+
                 </form>
-                <Text className="text-green-800 m-auto p-2">
-                    {error}
-                </Text>
+                {successMessage && (<Notification icon={<IconCheck size="1.1rem" />} color="teal" title="Successfully made a post.">
+                    {successMessage}                  
+                </Notification>)}
+
+                {isLoading && (<Loader size="md"  className="m-auto"/>)}
 
             </Modal>
 

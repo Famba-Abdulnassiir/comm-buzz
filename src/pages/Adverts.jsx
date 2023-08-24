@@ -1,22 +1,25 @@
-import { Card, Image, Text, Button, Paper, Title, FileInput, rem, Modal, Group, TextInput } from '@mantine/core';
-import { useState, useEffect} from 'react';
-import { IconUpload } from '@tabler/icons-react';
+import { Card, Image, Notification, Text, Button, Paper, Title, FileInput, Loader, rem, Modal, Group, TextInput } from '@mantine/core';
+import { useState, useEffect } from 'react';
+import { IconUpload, IconCheck, IconX } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
 import useAdsContext from '../context/AppContext';
 
 
 
+
 function Adverts() {
-    const {adverts, setAdverts} = useAdsContext();
-    const advertsUrl = 'http://localhost:1337/api/adverts?populate=advert_image';
-    const advertPostUrl = "http://localhost:1337/api/adverts"
-    const uploadUrl = "http://localhost:1337/api/upload/";
+    const { adverts, setAdverts } = useAdsContext();
+    const advertsUrl = 'https://strapi-kufv.onrender.com/api/adverts?populate=advert_image';
+    const advertPostUrl = "https://strapi-kufv.onrender.com/api/adverts"
+    const uploadUrl = "https://strapi-kufv.onrender.com/api/upload/";
     const [selectedFile, setSelectedFile] = useState(null);
     const [opened, { open, close }] = useDisclosure(false);
     const [success, setSuccess] = useState('')
-    const [isLoading, setIsLoading] = useState(false)
-    
+    const [error, setError] = useState('')
+    const [isLoading, setIsLoading] = useState(true)
+    const [successMessage, setSuccessMessage] = useState("")
+
     // const context = useContext(AdsContext)
     // context.updateAdverts("try")
     //from Mantine useForm we can initialise our values take this as setState in normal react
@@ -27,7 +30,7 @@ function Adverts() {
             post_description: ''
         },
     });
- 
+
 
     useEffect(() => {
         fetch(advertsUrl)
@@ -36,7 +39,10 @@ function Adverts() {
                 const fetchedAdverts = data?.data || [];
                 setAdverts(fetchedAdverts)
 
-            })
+            }).catch(error => {
+                console.error("Error fetching data:", error);
+                setError('OPPs. An error occurred while fetching data.... Check you internet Connectivity');
+            }).finally(() => setIsLoading(false));
     }, [])
 
     //Handle Image upload first before we can handle entire post for adverts
@@ -48,6 +54,8 @@ function Adverts() {
         if (selectedFile) {
             const formData = new FormData();
             formData.append("files", selectedFile);
+
+            setIsLoading(true);
 
             fetch(uploadUrl, {
                 method: "POST",
@@ -80,14 +88,27 @@ function Adverts() {
                     }).then(response => {
                         response.json()
                         if (response.ok) {
-                            setSuccess('Advert Successfull Uploaded')
+                            setSuccessMessage('Advert Successfully Uploaded')
+                            form.reset();
+
+                            setTimeout(() => {
+                                close();
+                                setSuccessMessage("");                                
+                            }, 2300);
+
+                            window.location.reload(false);
+                            // return (adverts)
                         } else {
                             throw new Error('Please Ensure all the Fields are entered Correctly');
                         }
-                    })
-                        
-                })
-        }
+                    }).finally(() => setIsLoading(false));
+
+                }).catch(error => {
+                    setError('OPPs. An error occurred while fetching data.... Check you internet Connectivity')
+                    setIsLoading(false);
+
+        })
+    }
     }
 
     //After here we can handle our submit logic like add other feilds we want to submit with the button.
@@ -108,7 +129,7 @@ function Adverts() {
                 <Button className="text-center bg-blue-800 ml-7 mb-2" onClick={open}> Post An Advert</Button>
             </Paper>
             <div className="m-10 flex  flex-row flex-wrap gap-3 h-3/5">
-                {
+                {error ? (<Text className="text-center err" size="xl">{error}</Text>) : isLoading ? (<div className="loader-adverts"><Loader size="xl" className="w-1/5" /> <Text size="lg">Loading....</Text></div>) : (
                     adverts.map(advert => {
                         const { id, attributes } = advert || {};
 
@@ -150,7 +171,7 @@ function Adverts() {
                         }
                         return null;
                     })
-                }
+                )}
             </div>
 
             {/*This is a popup that when clicked it will let someone post an annoucement*/}
@@ -173,29 +194,28 @@ function Adverts() {
                             {...form.getInputProps("post_description")}
                         />
 
-                        <div  className="border-2 border-dashed p-3 w-10/12 m-auto text-center">
-                         <input id="imageUpload" className="m-auto"
-                            type='file'
-                            label="Advert Image"
-                            placeholder="Upload Your Image"
-                            accept="image/png,image/jpeg,image/jpg"
-                            onChange={(e) => setSelectedFile(e.target.files[0])}
-                            icon={<IconUpload size={rem(14)} />}
-                        />
+                        <div className="border-2 border-dashed p-3 w-10/12 m-auto text-center">
+                            <input id="imageUpload" className="m-auto"
+                                type='file'
+                                label="Advert Image"
+                                placeholder="Upload Your Image"
+                                accept="image/png,image/jpeg,image/jpg"
+                                onChange={(e) => setSelectedFile(e.target.files[0])}
+                                icon={<IconUpload size={rem(14)} />}
+                            />
                         </div>
 
-                        
+
 
                     </Group>
+                    <Button type="submit" className="bg-blue-500 mt-3">Post</Button>
                     <br />
-                    <Button className="bg-blue-700 m-auto" type="submit">Post</Button>
-                </form>
-                <Text className="text-green">
-                {success || Error} 
-                </Text>
-                <Text>
-                   
-                </Text>
+                    </form>
+                    {successMessage && (<Notification icon={<IconCheck size="1.1rem" />} color="teal" title="Successfully made a post.">
+                        {successMessage}
+                    </Notification>)}
+
+                    {isLoading && (<Loader size="md" className="m-auto" />)}
             </Modal>
         </>
 

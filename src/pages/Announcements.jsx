@@ -1,21 +1,25 @@
 
 import { useNavigate } from 'react-router-dom';
-import { Input, Button, Title, Text, Group, Modal, TextInput, Textarea } from '@mantine/core';
+import { Input, Button, Title, Text, Group, Notification, Modal, TextInput, Textarea, Loader } from '@mantine/core';
 import { IconBellSearch } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
+import { IconCheck, IconX } from '@tabler/icons-react';
 
 
 
 function Announcements() {
     const [opened, { open, close }] = useDisclosure(false);
-    const announcementsUrl = 'http://localhost:1337/api/announcements';
-    const postAnnoucementUrl = 'http://localhost:1337/api/announcements';
+    const announcementsUrl = 'https://strapi-kufv.onrender.com/api/announcements';
+    const postAnnoucementUrl = 'https://strapi-kufv.onrender.com/api/announcements';
     const [announcements, setAnnouncements] = useState([]);
     const [search, setSearch] = useState('');
     const navigate = useNavigate();
-    const [error, setError] = useState('')
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+    const [successMessage, setSuccessMessage] = useState('');
+
 
     //from Mantine useForm we can initialise our values take this as setState in normal react
     const form = useForm({
@@ -31,11 +35,13 @@ function Announcements() {
             .then(response => response.json())
 
             .then(data => {
-                console.log(data)
                 const Responseannouncements = data?.data || [];
                 setAnnouncements(Responseannouncements)
 
-            });
+            }).catch(error => {
+                console.error("Error fetching data:", error);
+                setError('OPPs. An error occurred while fetching data.... Check you internet Connectivity');
+            }).finally(() => setIsLoading(false));;
 
     }, [])
 
@@ -65,7 +71,7 @@ function Announcements() {
 
     const handlePost = (values) => {
         const { title, content } = form.values;
-        
+        setIsLoading(true)
 
         fetch(postAnnoucementUrl, {
             method: 'POST',
@@ -82,15 +88,23 @@ function Announcements() {
             )
         }).then(response => {
             if (response.ok) {
-                // navigate('/dashboard/announcements');
-                // window.location.reload(false)
-                setError('Announcement successfuly posted')
+                setSuccessMessage('Announcement Successfully Uploaded')
+                form.reset();
+
+                setTimeout(() => {
+                    close();
+                    setSuccessMessage("");                                
+                }, 2300); 
+             
+            window.location.reload(false);
+            return(announcements)
+
             } else {
                 throw new Error('Please Ensure all the Fields are entered Correctly');
             }
         }).catch(error => {
-            console.log(error);
-        })
+            setError("OPPs something Happened failed to post data...")
+        }).finally(() => setIsLoading(false));
 
     }
 
@@ -101,7 +115,7 @@ function Announcements() {
             </p>
             <div className="flex align-middle justify-center gap-2 bg-slate-800 p-2">
                 <div className="w-32">
-                    <img src="../src/assets/megaphone2.png" alt="Megaphone image for notifications" />
+                    <img src="https://res.cloudinary.com/dxlqahuqr/image/upload/v1692798837/mzhwsanzviimmsooorfn.png" alt="Megaphone image for notifications" />
                 </div>
                 <div className="flex w-4/5 justify-center align-middle gap-2">
                     <Input className="m-auto w-4/5"
@@ -126,7 +140,7 @@ function Announcements() {
             {/*Stracture the style of the jsx to be returned
              This will display the overall announcements and filtered announcement.*/}
             <div className="m-auto mt-6" >
-                {filteredSearch.map(announcement => {
+            {error?(<Text className="text-center err" size="xl">{error}</Text>):isLoading?(<div className="announcement-loader"><Loader size="xl" className="w-1/5"/> <Text size="lg">Loading....</Text></div>):(filteredSearch.map(announcement => {
                     const { id, attributes } = announcement || {};
 
                     if (id && attributes) {
@@ -159,7 +173,8 @@ function Announcements() {
 
                     return null;
 
-                })}
+                })
+            )}
 
             </div>
 
@@ -181,9 +196,11 @@ function Announcements() {
                 <br />
                 <Button className="bg-blue-700 m-auto" type="submit">Post</Button>
             </form>
-            <Text className="text-green">
-                {error}
-            </Text>
+            {successMessage && (<Notification icon={<IconCheck size="1.1rem" />} color="teal" title="Successfully made a post.">
+                    {successMessage}                  
+                </Notification>)}
+
+                {isLoading && (<Loader size="md"  className="m-auto"/>)}
             </Modal>
         </>
     )

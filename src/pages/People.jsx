@@ -1,14 +1,17 @@
-import { Card, Image, Text, Badge, Button, Group, TextInput } from '@mantine/core';
+import { Card, Image, Text, Badge, Button, Loader, Group, TextInput } from '@mantine/core';
 import { IconBellSearch } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import 'boxicons'
 
 
+
 function People() {
-    const userUrl = "http://localhost:1337/api/people?populate=profile_pic";
+    const userUrl = "https://strapi-kufv.onrender.com/api/people?populate=profile_pic";
     const [users, setUsers] = useState([]);
     const [search, setSearch] = useState('');
+    const [error, setError] = useState('')
+    const [isLoading, setIsLoading] = useState(true)
 
 
     useEffect(() => {
@@ -18,7 +21,10 @@ function People() {
                 const fetchedUsers = data?.data || [];
                 console.log(data)
                 setUsers(fetchedUsers)
-            });
+            }).catch(error => {
+                console.error("Error fetching data:", error);
+                setError('OPPs. An error occurred while fetching data.... Check you internet Connectivity');
+            }).finally(() => setIsLoading(false));;
     }, [])
 
     //Search for Announcements
@@ -55,7 +61,7 @@ function People() {
             <div className="flex flex-row flex-wrap gap-3 ml-8 mt-3">
 
             
-                {
+                {error?(<Text className="text-center err" size="xl">{error}</Text>):isLoading?(<div className="m-auto mt-40"><Loader size="xl" className="w-1/5"/> <Text size="lg">Loading....</Text></div>):(
                     filteredSearch.map(person => {
                         
                         const {id, attributes} = person;
@@ -121,7 +127,7 @@ function People() {
                         )
                         } else return null;
                     })
-                }
+                )}
             </div>
 
             

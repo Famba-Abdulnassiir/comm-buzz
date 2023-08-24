@@ -1,5 +1,6 @@
 import Header from "../components/Header";
 import { Link, Outlet } from "react-router-dom";
+import Home from "../pages/Home";
 
 function Dashboard() {
     return (
@@ -9,7 +10,7 @@ function Dashboard() {
                 <aside className="bg-slate-800 text-white h-screen w-1/5 flex flex-col justify-between">
                     <div>
                         <div className="mt-4 mb-16 ml-4 mr-4" >
-                            <img src="../src/assets/comm buzz final.png" alt="Comm Buzz Logo" />
+                            <img src="https://res.cloudinary.com/dxlqahuqr/image/upload/v1692798827/obazgor43wietofqs8ex.png" alt="Comm Buzz Logo" />
 
                         </div>
                         <ul className="ml-8 text-lg">
@@ -33,6 +34,7 @@ function Dashboard() {
                 </aside>
                 <div className="h-screen w-screen">
                     <Header />
+                    
                     <main className="overflow-scroll main overflow-x-hidden">
                         <Outlet />
                         {/* <People/> */}

@@ -1,14 +1,17 @@
-import { Text, Paper, Title, Button, Group, Badge, Modal, TextInput,Textarea} from '@mantine/core';
+import { Text, Paper, Title, Loader, Notification, Button, Group, Badge, Modal, TextInput,Textarea} from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
+import { IconCheck, IconX } from '@tabler/icons-react';
 
 function Jobs() {
     const [jobs, setJobs] = useState([]);
     const [opened, { open, close }] = useDisclosure(false);
-    const jobsUrl = 'http://localhost:1337/api/jobs';
-    const [error, setError] = useState ('');
+    const jobsUrl = 'https://strapi-kufv.onrender.com/api/jobs';
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+    const [successMessage, setSuccessMessage] = useState('');
 
 
      //from Mantine useForm we can initialise our values take this as setState in normal react
@@ -30,13 +33,17 @@ function Jobs() {
                 const fetchedJobs = data?.data || [];
                 setJobs(fetchedJobs)
 
-            })
+            }).catch(error => {
+                console.error("Error fetching data:", error);
+                setError('OPPs. An error occurred while fetching data.... Check you internet Connectivity');
+            }).finally(() => setIsLoading(false));
 
     }, [])
 
     const handlePost = (values) => {
         const {title,location,nature,salary,link,mini_desc} = form.values;
         
+        setIsLoading(true);        
 
         fetch(jobsUrl, {
             method: 'POST',
@@ -58,17 +65,22 @@ function Jobs() {
                 }
             )
         }).then(response => {
-            if (response.ok) {
-                // navigate('/dashboard/announcements');
-                window.location.reload(false)
-                setError('Job successfuly posted')
+                if (response.ok) {
+                    setSuccessMessage('Post Successfully Uploaded')
+                    form.reset();
+
+                    setTimeout(() => {
+                        close();
+                        setSuccessMessage("");                                
+                    }, 2300);    
+
+                    window.location.reload(false);
+
             } else {
                 throw new Error('Please Ensure all the Fields are entered Correctly');
             }
-        }).catch(error => {
-            console.log(error);
-        })
-
+        }).finally(() => setIsLoading(false));
+        
     }
 
 
@@ -85,7 +97,7 @@ function Jobs() {
             </Paper>
 
             <div >
-                {
+                {error?(<Text className="text-center err" size="xl">{error}</Text>):isLoading?(<div className="l-jobs"><Loader size="xl" className="w-1/5"/> <Text size="lg">Loading....</Text></div>):(
                     jobs.map(job => {
                         const { id, attributes } = job || {};
 
@@ -124,13 +136,13 @@ function Jobs() {
                                 </div>)
                         }
                     })
-                }
+                )}
 
             </div>
 
              {/* Display our Modal from which the user will enter the details to post */}
              <Modal opened={opened} onClose={close} title="Post Announcement" centered>
-            <form onSubmit={form.onSubmit(handlePost)}>
+            <form onSubmit={form.onSubmit(handlePost)} >
                 <Group>
                     <TextInput className="w-10/12 m-auto"
                         label="Job Title"
@@ -166,9 +178,11 @@ function Jobs() {
                 <br />
                 <Button className="bg-blue-700 m-auto" type="submit">Post</Button>
             </form>
-            <Text className="text-green">
-                {error}
-            </Text>
+            {successMessage && (<Notification icon={<IconCheck size="1.1rem" />} color="teal" title="Successfully made a post.">
+                    {successMessage}                  
+                </Notification>)}
+
+                {isLoading && (<Loader size="md"  className="m-auto"/>)}
             </Modal>
         </>
     );

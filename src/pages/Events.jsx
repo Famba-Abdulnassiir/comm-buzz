@@ -1,4 +1,4 @@
-import { Paper, Image, NativeSelect, Text, Box, Modal } from '@mantine/core';
+import { Paper, Image, NativeSelect, Text, Box, Modal, Loader } from '@mantine/core';
 import { Calendar } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import { useEffect, useState } from 'react';
@@ -6,9 +6,11 @@ import { Link } from 'react-router-dom';
 
 
 function Events() {
-    const eventsUrl = 'http://localhost:1337/api/events?populate=event_image';
+    const eventsUrl = 'https://strapi-kufv.onrender.com/api/events?populate=event_image';
     const [occurrences, setOccurrences] = useState([]);
     const [opened, { open, close }] = useDisclosure(false);
+    const [error, setError] = useState('')
+    const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         fetch(eventsUrl)
@@ -17,7 +19,10 @@ function Events() {
                 const fetchedEvents = data?.data || [];
                 console.log(data)
                 setOccurrences(fetchedEvents);
-            })
+            }).catch(error => {
+                console.error("Error fetching data:", error);
+                setError('OPPs. An error occurred while fetching data.... Check you internet Connectivity');
+            }).finally(() => setIsLoading(false));
     }, [])
 
 
@@ -39,7 +44,7 @@ function Events() {
                             </Text>
 
                             <Image
-                                src="../src/assets/events 3.jpg"
+                                src="https://res.cloudinary.com/dxlqahuqr/image/upload/v1692798871/b1gvtwaqzwer6dk4jrvq.jpg"
                                 radius="sm"
                             >
 
@@ -65,7 +70,7 @@ function Events() {
                     </div>
 
                     <div>
-                        {
+                        {error ? (<Text className="text-center err" size="xl">{error}</Text>) : isLoading ? (<div className="loader"><Loader size="xl" className="w-1/5" /> <Text size="lg">Loading....</Text></div>) : (
                             occurrences.map(occurrence => {
                                 const { id, attributes } = occurrence || {};
 
@@ -78,38 +83,38 @@ function Events() {
 
                                     return (
                                         <>
-                                                <div key={id}   className="mb-3">
-                                                    <div  className="border-t-4 bg-white pr-4 rounded-lg border-t-gray-500 flex flex-row gap-5">
-                                                        <div className="w-48 m-3">
-                                                            {image_url ? <Image
-                                                                src={image_url}
-                                                                height={188}
-                                                                alt="Profile Image"
-                                                            /> : null}
+                                            <div key={id} className="mb-3">
+                                                <div className="border-t-4 bg-white pr-4 rounded-lg border-t-gray-500 flex flex-row gap-5">
+                                                    <div className="w-48 m-3">
+                                                        {image_url ? <Image
+                                                            src={image_url}
+                                                            height={188}
+                                                            alt="Profile Image"
+                                                        /> : null}
+                                                    </div>
+                                                    <div className="pt-4 flex justify-between flex-col">
+
+                                                        <div>
+                                                            <p className="text-amber-600">{new Date(event_date).toString()}</p>
+                                                            <p className="font-bold text-blue-950">{event_title}</p>
+                                                            <p className="text-gray-500">{event_location}</p>
                                                         </div>
-                                                        <div className="pt-4 flex justify-between flex-col">
 
-                                                            <div>
-                                                                <p className="text-amber-600">{new Date(event_date).toString()}</p>
-                                                                <p className="font-bold text-blue-950">{event_title}</p>
-                                                                <p className="text-gray-500">{event_location}</p>
-                                                            </div>
+                                                        <p className="pt-3 pb-3 text-gray-500">{event_attendees}</p>
 
-                                                            <p className="pt-3 pb-3 text-gray-500">{event_attendees}</p>
-
-                                                        </div>
-                                                        <div className="pt-4 flex justify-between flex-col">
-                                                            <p className="font-bold text-blue-950">Suggested</p>
-                                                            <div className="pb-3 text-gray-400">
-                                                                <i className="fa-solid fa-share-nodes"></i>
-                                                            </div>
-
+                                                    </div>
+                                                    <div className="pt-4 flex justify-between flex-col">
+                                                        <p className="font-bold text-blue-950">Suggested</p>
+                                                        <div className="pb-3 text-gray-400">
+                                                            <i className="fa-solid fa-share-nodes"></i>
                                                         </div>
 
                                                     </div>
 
                                                 </div>
-                                            
+
+                                            </div>
+
 
                                             <Modal opened={opened} onClose={close} title="Post Feed" centered>
                                                 <p>
@@ -122,7 +127,7 @@ function Events() {
                                 }
                                 return null
                             })
-                        }
+                        )}
 
                     </div>
 

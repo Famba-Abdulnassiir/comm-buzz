@@ -1,13 +1,9 @@
 import Dashboard from "./Layout/Dashboard"
-import { AdsProvider } from "./context/AppContext"
+import LoginScreen from "./pages/Login"
 
 function App() {
   return (
-   
-    <AdsProvider>
-      <Dashboard/>
-    </AdsProvider>
-   
+      <LoginScreen/> 
   )
 }
 
